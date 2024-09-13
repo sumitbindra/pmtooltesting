@@ -1,0 +1,84 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Project Manager Assistant</title>
+    <script>
+        function startCountdown(nextRunTime) {
+            // Parse the next run time in UTC
+            var countDownDate = new Date(nextRunTime + " UTC").getTime();
+
+            // Update the count down every 1 second
+            var x = setInterval(function() {
+                // Get today's date and time
+                var now = new Date().getTime();
+
+                // Find the distance between now and the count down date
+                var distance = countDownDate - now;
+
+                // Time calculations for days, hours, minutes and seconds
+                var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                // Display the result in the element with id="countdown"
+                document.getElementById("countdown").innerHTML = hours + "h "
+                + minutes + "m " + seconds + "s ";
+
+                // If the count down is over, write some text
+                if (distance < 0) {
+                    clearInterval(x);
+                    document.getElementById("countdown").innerHTML = "Running now...";
+                }
+            }, 1000);
+        }
+    </script>
+</head>
+<body onload="startCountdown('{{ next_run_time }}')">
+    <h1>Project Manager Assistant</h1>
+
+    <!-- Display Message -->
+    {% if message %}
+    <p style="color: green;">{{ message }}</p>
+    {% endif %}
+
+    <!-- Upload Form -->
+    <h2>Upload Project Scope Document</h2>
+    <form action="/upload/" enctype="multipart/form-data" method="post">
+        <input name="file" type="file" accept=".pdf,.docx" required>
+        <input type="submit" value="Upload">
+    </form>
+
+    <!-- Cron Job Time Update -->
+    <h2>Set Cron Job Time</h2>
+    <form action="/update_schedule/" method="post">
+        <label for="hour">Hour (0-23):</label>
+        <input type="number" id="hour" name="hour" min="0" max="23" required>
+        <label for="minute">Minute (0-59):</label>
+        <input type="number" id="minute" name="minute" min="0" max="59" value="0" required>
+        <input type="submit" value="Update Schedule">
+    </form>
+
+    <!-- Display Next Cron Job Execution Time -->
+    <h2>Next Cron Job Execution</h2>
+    {% if next_run_time != "No scheduled job." %}
+        <p>The next cron job will run at: {{ next_run_time }}</p>
+        <p>Time left until next execution: <span id="countdown"></span></p>
+    {% else %}
+        <p>No scheduled cron job.</p>
+    {% endif %}
+
+    <!-- Display Suggestions -->
+    <h2>Daily Suggestions</h2>
+    {% if suggestions %}
+        {% for suggestion in suggestions %}
+            <div>
+                <h3>{{ suggestion.date }}</h3>
+                <p>{{ suggestion.content }}</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No suggestions available.</p>
+    {% endif %}
+</body>
+</html>

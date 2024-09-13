@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+python-multipart
+jinja2
+httpx
+PyPDF2
+python-docx
+openai
+apscheduler
+pytz
